@@ -1,65 +1,32 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BubuWrite - Text to Cute Animation</title>
     <style>
-        /* Simple & Cute Design */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #fff0f5; 
-            text-align: center; 
-            margin: 0;
-            padding: 20px;
-        }
-        .main-box {
-            background: white;
-            max-width: 450px;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 30px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }
-        h1 { color: #ff69b4; font-size: 28px; margin-bottom: 5px; }
-        p { color: #888; margin-bottom: 25px; }
-        
-        input { 
-            width: 80%; 
-            padding: 12px; 
-            border: 2px solid #ffc0cb; 
-            border-radius: 15px; 
-            outline: none;
-            font-size: 16px;
-        }
-        
-        button { 
-            background-color: #ff69b4; 
-            color: white; 
-            border: none; 
-            padding: 12px 30px; 
-            border-radius: 15px; 
-            margin-top: 15px; 
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { background-color: #ff1493; transform: scale(1.05); }
-
-        #displayArea { margin-top: 30px; }
-        img { max-width: 100%; border-radius: 20px; display: none; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fff0f5; text-align: center; padding: 20px; margin: 0; }
+        .main-box { background: white; max-width: 400px; margin: 30px auto; padding: 25px; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        h1 { color: #ff69b4; margin-bottom: 10px; }
+        input { width: 85%; padding: 12px; border: 2px solid #ffc0cb; border-radius: 15px; outline: none; font-size: 16px; margin-bottom: 15px; }
+        button { background-color: #ff69b4; color: white; border: none; padding: 12px 25px; border-radius: 15px; cursor: pointer; font-weight: bold; font-size: 16px; width: 90%; }
+        button:active { transform: scale(0.98); }
+        #displayArea { margin-top: 25px; min-height: 200px; }
+        img { max-width: 100%; border-radius: 20px; display: none; border: 4px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .loading-text { color: #ff69b4; font-weight: bold; display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="main-box">
         <h1>BubuWrite 🐾</h1>
-        <p>Apna message likho aur Bubu banaye!</p>
-
-        <input type="text" id="textInput" placeholder="Type your message here...">
-        <br>
+        <p style="color: #888;">Type your message and wait 2 seconds!</p>
+        
+        <input type="text" id="textInput" placeholder="I love you Bholu...">
         <button onclick="generateBubu()">Generate Animation</button>
-
+        
         <div id="displayArea">
+            <div id="loader" class="loading-text">Making it cute... Please wait...</div>
             <img id="bubuGif" src="" alt="Bubu Animation">
         </div>
     </div>
@@ -68,22 +35,37 @@
         function generateBubu() {
             const val = document.getElementById('textInput').value;
             const img = document.getElementById('bubuGif');
+            const loader = document.getElementById('loader');
 
-            if (val === "") {
-                alert("Please enter some text!");
+            if (val.trim() === "") {
+                alert("Please enter a message!");
                 return;
             }
 
-            // Simple Logic: Cloudinary overlays your text on a preset Bubu GIF
-            const encodedText = encodeURIComponent(val);
-            const cloudName = "demo"; 
-            const baseGif = "https://media.tenor.com/79_uS47v_E0AAAAC/bubu-dudu-bubu.gif";
-            
-            // This URL creates the text overlay automatically
-            const finalUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/l_text:Verdana_40_bold:${encodedText},co_rgb:ff1493,g_south,y_20/${baseGif}`;
+            // Show loader, hide old image
+            loader.style.display = "block";
+            img.style.display = "none";
 
+            // Encode text for URL
+            const encodedText = encodeURIComponent(val);
+            
+            // This is the direct magic link
+            const finalUrl = `https://res.cloudinary.com/demo/image/fetch/l_text:Arial_40_bold:${encodedText},co_rgb:ff1493,g_south,y_25/https://media.tenor.com/79_uS47v_E0AAAAC/bubu-dudu-bubu.gif`;
+
+            // Set the source
             img.src = finalUrl;
-            img.style.display = "inline-block";
+
+            // When image is fully loaded by Cloudinary
+            img.onload = function() {
+                loader.style.display = "none";
+                img.style.display = "inline-block";
+            };
+
+            // Error check
+            img.onerror = function() {
+                loader.style.display = "none";
+                alert("Something went wrong. Check your internet!");
+            };
         }
     </script>
 
